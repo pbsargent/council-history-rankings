@@ -32,6 +32,22 @@ def check_freshness(source, started, now=None):
     return acquired
 
 
+def check_retention_continuity(previous, payload):
+    """Allow source blanks for zero-unit programs; retain active-program loss checks."""
+    not_applicable = []
+    for program, records in payload["unit_metrics"].items():
+        prior = {r["council_number"]: r for r in previous["unit_metrics"][program]}
+        for row in records:
+            before = prior.get(row["council_number"], {})
+            if before.get("retention_rate") is not None and row["retention_rate"] is None:
+                if row.get("units") == 0:
+                    not_applicable.append({"program": program, "council": row["council"],
+                                           "council_number": row["council_number"], "units": 0})
+                else:
+                    raise ValueError(f"Previously populated retention is now missing: {program} {row['council']}")
+    return not_applicable
+
+
 def prepare(source, started, run_dir, check_only=False):
     stage = "source acquisition"
     report = {"status": "fail", "stage": stage, "run_started_at": started.isoformat()}
@@ -81,12 +97,7 @@ def prepare(source, started, run_dir, check_only=False):
         for number in old.keys() & new.keys():
             if old[number].get("tay") not in (None, 0) and new[number].get("tay") in (None, 0):
                 raise ValueError(f"Previously populated TAY is now missing: {new[number]['council']}")
-        for program, records in payload["unit_metrics"].items():
-            prior = {r["council_number"]: r for r in previous["unit_metrics"][program]}
-            for row in records:
-                before = prior.get(row["council_number"], {})
-                if before.get("retention_rate") is not None and row["retention_rate"] is None:
-                    raise ValueError(f"Previously populated retention is now missing: {program} {row['council']}")
+        report["zero_unit_metric_blanks"] = check_retention_continuity(previous, payload)
         report.update(previous_councils=len(old), added_councils=sorted(new.keys()-old.keys()),
                       removed_councils=sorted(old.keys()-new.keys()),
                       generated_at=payload["metadata"]["generated_at"],

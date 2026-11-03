@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from prepare_refresh import check_freshness, prepare
+from prepare_refresh import check_freshness, check_retention_continuity, prepare
 from source_contract import COUNCIL_HEADERS, METRIC_HEADERS, PROGRAM_SHEETS, inspect_source
 from validate_site import ROOT, competition_ranks, validate
 from verify_release import verify_files
@@ -20,6 +20,30 @@ class RefreshTests(unittest.TestCase):
 
     def test_current_payload_and_brand_pass(self):
         self.assertEqual(validate(self.data), [])
+
+    def test_zero_unit_program_can_lose_continuation_metric(self):
+        previous = {"unit_metrics": {"Posts": [{"council_number": "802", "retention_rate": 1.5, "units": 1}]}}
+        row = {"council_number": "802", "council": "Transatlantic Council, BSA 802", "units": 0, "retention_rate": None}
+        payload = {"unit_metrics": {"Posts": [row]}}
+        original = copy.deepcopy(payload)
+        self.assertEqual(check_retention_continuity(previous, payload), [
+            {"program": "Posts", "council": row["council"], "council_number": "802", "units": 0}])
+        self.assertEqual(payload, original)
+        for units in (1, 2, None):
+            with self.subTest(units=units):
+                row["units"] = units
+                with self.assertRaisesRegex(ValueError, "Previously populated retention"):
+                    check_retention_continuity(previous, payload)
+
+    def test_zero_and_above_100_metric_values_are_preserved(self):
+        previous = {"unit_metrics": {"Posts": [{"council_number": "802", "retention_rate": 1.5}]}}
+        for units in (0, 1):
+            for rate in (0, 1.5, 5):
+                with self.subTest(units=units, rate=rate):
+                    payload = {"unit_metrics": {"Posts": [{"council_number": "802", "units": units, "retention_rate": rate}]}}
+                    original = copy.deepcopy(payload)
+                    self.assertEqual(check_retention_continuity(previous, payload), [])
+                    self.assertEqual(payload, original)
 
     def test_competition_ties_and_blank_ranks(self):
         rows = [{"council": name, "rate": value} for name, value in [("A", .1), ("B", .1), ("C", .05), ("D", None)]]
