@@ -95,7 +95,7 @@ select, input { width: 100%; min-width: 0; height: 44px; border: 1px solid var(-
 .hero select { color-scheme: light; border-color: #fff; color: #003366; background: #fff; }
 :focus-visible { outline: 3px solid var(--pale-blue); outline-offset: 3px; }
 
-.kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(132px, 1fr)); gap: 14px; margin: 16px 0; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(132px, 1fr)); gap: 14px; margin: 16px 0; }
 .compact-kpis { grid-template-columns: repeat(4, minmax(150px, 1fr)); }
 .kpi, .panel { min-width: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); box-shadow: var(--shadow); }
 .kpi { min-height: 140px; display: grid; align-content: space-between; padding: 20px 16px; border-top: 4px solid var(--blue-500); }

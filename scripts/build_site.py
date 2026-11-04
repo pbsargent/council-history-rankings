@@ -180,6 +180,8 @@ def extract_councils(reader: XlsxReader, sheet_name: str) -> tuple[list[dict[str
                 "year_end_youth": year_end,
                 "year_end_delta": ye_delta,
                 "year_end_pct": ratio(ye_delta, year_end),
+                "square_miles": clean_number(cells.get(18)) if sheet_name == "Councils" else None,
+                "urban_pct": clean_number(cells.get(19)) if sheet_name == "Councils" else None,
                 "tay": tay,
                 "tay_pct": ratio(current, tay),
             }

@@ -107,15 +107,20 @@ class RefreshTests(unittest.TestCase):
                     for index, name in enumerate(names, 2):
                         yield index, {2: name, 3: 1}
                 else:
-                    yield 2, {**COUNCIL_HEADERS, 15: "TAY", 16: "TAY %", 17: "TAY Rank"}
+                    yield 2, {**COUNCIL_HEADERS, 15: "TAY", 16: "TAY %", 17: "TAY Rank", 18: "Sqare Miles", 19: "% Urban"}
                     for index, name in enumerate(names, 3):
-                        yield index, {2: name, 3: 1, 4: 10, 5: 9, 9: 9, 15: 1000}
+                        yield index, {2: name, 3: 1, 4: 10, 5: 9, 9: 9, 15: 1000, 18: 1234.5, 19: 0.75}
 
-        payload = {"councils": [{"council": name, "units": 1, "current_youth": 10, "prior_youth": 9, "year_end_youth": 9, "tay": 1000} for name in names],
+        payload = {"councils": [{"council": name, "units": 1, "current_youth": 10, "prior_youth": 9, "year_end_youth": 9, "tay": 1000, "square_miles": 1234.5, "urban_pct": 0.75} for name in names],
                    "unit_metrics": {program: [{"council": name, "retention_rate": 1.5} for name in names] for program in PROGRAM_SHEETS}}
         with patch("source_contract.XlsxReader", Reader):
             result = inspect_source(Path("Councils Ranked.xlsx"), payload)
             self.assertEqual(result["retention_above_100_count"], 1200)
+            for field in ("square_miles", "urban_pct"):
+                altered = copy.deepcopy(payload)
+                altered["councils"][0][field] = 0
+                with self.assertRaisesRegex(ValueError, "Source mismatch"):
+                    inspect_source(Path("Councils Ranked.xlsx"), altered)
             clamped = copy.deepcopy(payload)
             clamped["unit_metrics"]["Ships"][0]["retention_rate"] = 1
             with self.assertRaisesRegex(ValueError, "retention was changed"):

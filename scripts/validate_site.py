@@ -14,7 +14,7 @@ from source_contract import PROGRAM_SHEETS
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = ["index.html", "rankings.html", "unit-health.html", "about.html"]
 REQUIRED = [*PAGES, "assets/dashboard.css", "assets/dashboard.js", "assets/scouting-america-signature.png", ".nojekyll"]
-COUNCIL = set("cst council council_number units current_youth prior_youth yoy_delta yoy_pct yoy_rank year_end_youth year_end_delta year_end_pct year_end_rank tay tay_pct tay_rank".split())
+COUNCIL = set("cst council council_number units current_youth prior_youth yoy_delta yoy_pct yoy_rank year_end_youth year_end_delta year_end_pct year_end_rank tay tay_pct tay_rank square_miles urban_pct".split())
 PIN = set("council council_number units pin_active_rate apply_active_rate fundraising_active_rate trial_visit_rate unit_fee_rate updated_in_year_rate meeting_day_rate".split())
 METRIC = set("program council council_number units average_metric metric_low_count metric_mid_count metric_high_count metric_low_rate metric_mid_rate metric_high_rate trained_rate healthy_size_rate membership_growth_unit_rate advancement_rate outdoor_rate retention_rate youth_current youth_prior youth_delta youth_growth_rate".split())
 SUMMARY = (METRIC - {"council", "council_number", "metric_low_rate", "metric_mid_rate", "metric_high_rate"}) | {"councils"}
@@ -55,7 +55,7 @@ def validate(data, root=ROOT):
         allowed = COUNCIL | (set() if nested else {"pin", "pack_troop"})
         if selected:
             allowed |= {"unit_metrics", "peer_count"}
-        keys(record, allowed, path, {"council", "council_number", "units", "current_youth", "tay", "tay_pct"})
+        keys(record, allowed, path, {"council", "council_number", "units", "current_youth", "tay", "tay_pct", "square_miles", "urban_pct"})
         scalars(record, {"council", "council_number"}, {"pin", "pack_troop", "unit_metrics"}, path)
         if record.get("pin") is not None:
             keys(record["pin"], PIN, path + ".pin", PIN)
@@ -110,6 +110,10 @@ def validate(data, root=ROOT):
             actual = record.get(field)
             if (expected is None) != (actual is None) or (expected is not None and not math.isclose(expected, actual, rel_tol=1e-12, abs_tol=1e-12)):
                 failures.append(f"{field} mismatch: {record['council']}")
+        if record.get("urban_pct") is not None and not 0 <= record["urban_pct"] <= 1:
+            failures.append(f"Invalid urban percentage: {record['council']}")
+        if record.get("square_miles") is not None and record["square_miles"] < 0:
+            failures.append(f"Invalid land area: {record['council']}")
         if record["yoy_delta"] != record["current_youth"] - record["prior_youth"]:
             failures.append(f"YOY delta mismatch: {record['council']}")
     expected_peers = {r["council"] for r in councils if r["council"] != selected["council"]

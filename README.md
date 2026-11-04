@@ -56,6 +56,10 @@ This waits for Pages success for that SHA, then requires HTTP 200 and exact comm
 
 Serve locally with any static web server, then open `index.html` through that server.
 
+## Geographic context
+
+The council overview and rankings include `square_miles` (matched ZIP land area) and `urban_pct` (2020 Census urban population share), imported unchanged from Councils columns R and S. The source header in R is spelled “Sqare Miles”; Data_Census_Gov supplies the full definitions. Source blanks remain unavailable. These fields do not change peer selection or growth ranks. The guarded refresh checks both source headers and exact values.
+
 ## Visual identity
 
 The design follows the supplied *Scouting America Brand Guidelines (2024)*, pages 11 and 14–16. It uses the primary blue (`#003F87`), red (`#CE1126`), tan, gray, and white, with approved secondary colors and Arial typography. The signature image is unaltered artwork extracted from page 11, displayed proportionally on white with clear space of at least one fleur-de-lis height.

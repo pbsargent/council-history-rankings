@@ -81,6 +81,8 @@ function renderOverview(data, selected) {
     kpiCard("National rank", `#${selected.yoy_rank}`, `Top ${100 - percentile}% by growth`, "teal"),
     kpiCard("Registered units", formatNumber(selected.units), `${(selected.current_youth / selected.units).toFixed(1)} youth per unit`),
     kpiCard("TAY penetration", formatPct(selected.tay_pct), `Rank ${formatRank(selected.tay_rank)} where available`, "teal"),
+    kpiCard("Urban population", formatPct(selected.urban_pct), "2020 Census urban population share", "teal"),
+    kpiCard("Square miles", formatNumber(selected.square_miles), "Matched ZIP land area"),
     kpiCard("Peer set", formatNumber(peers.length), "±20% units, youth, and TAY", "teal"),
   ].join("");
 
@@ -161,13 +163,15 @@ function renderRankings(data) {
     year_end_rank: (a, b) => a.year_end_rank - b.year_end_rank || a.council.localeCompare(b.council),
     tay_rank: (a, b) => a.tay_rank - b.tay_rank || a.council.localeCompare(b.council),
     tay_pct_desc: (a, b) => b.tay_pct - a.tay_pct || a.council.localeCompare(b.council),
+    urban_pct_desc: (a, b) => (b.urban_pct ?? -Infinity) - (a.urban_pct ?? -Infinity) || a.council.localeCompare(b.council),
+    square_miles_desc: (a, b) => (b.square_miles ?? -Infinity) - (a.square_miles ?? -Infinity) || a.council.localeCompare(b.council),
     name: (a, b) => a.council.localeCompare(b.council),
   };
   rows.sort(sorters[sort]);
   document.getElementById("rankingCount").textContent = `${formatNumber(rows.length)} councils`;
   document.getElementById("rankingRows").innerHTML = rows.length ? rows.map((record) => `<tr${record.council === focus.council ? ' class="focus-row"' : ""}>
-    <td>#${record.yoy_rank}</td><td><strong>${escapeHtml(record.council)}</strong></td><td class="num">${formatNumber(record.units)}</td><td class="num">${formatNumber(record.current_youth)}</td><td class="num">${formatNumber(record.prior_youth)}</td><td class="num ${classForValue(record.yoy_delta)}">${formatSigned(record.yoy_delta)}</td><td class="num ${classForValue(record.yoy_pct)}">${formatSignedPct(record.yoy_pct)}</td><td class="num ${classForValue(record.year_end_pct)}">${formatSignedPct(record.year_end_pct)}</td><td class="num">${formatPct(record.tay_pct)}</td><td class="num">${formatRank(record.tay_rank)}</td><td><a class="detail-link" href="index.html?council=${record.council_number}">Overview</a></td>
-  </tr>`).join("") : '<tr><td colspan="11" class="empty-state">No councils match these filters.</td></tr>';
+    <td>#${record.yoy_rank}</td><td><strong>${escapeHtml(record.council)}</strong></td><td class="num">${formatNumber(record.units)}</td><td class="num">${formatNumber(record.current_youth)}</td><td class="num">${formatNumber(record.prior_youth)}</td><td class="num ${classForValue(record.yoy_delta)}">${formatSigned(record.yoy_delta)}</td><td class="num ${classForValue(record.yoy_pct)}">${formatSignedPct(record.yoy_pct)}</td><td class="num ${classForValue(record.year_end_pct)}">${formatSignedPct(record.year_end_pct)}</td><td class="num">${formatPct(record.tay_pct)}</td><td class="num">${formatRank(record.tay_rank)}</td><td class="num">${formatPct(record.urban_pct)}</td><td class="num">${formatNumber(record.square_miles)}</td><td><a class="detail-link" href="index.html?council=${record.council_number}">Overview</a></td>
+  </tr>`).join("") : '<tr><td colspan="13" class="empty-state">No councils match these filters.</td></tr>';
   document.getElementById("rankingKpis").innerHTML = [
     kpiCard("Focus rank", `#${focus.yoy_rank}`, focus.council, "teal"),
     kpiCard("Focus growth", formatSignedPct(focus.yoy_pct), `${formatSigned(focus.yoy_delta)} youth`, tone(focus.yoy_pct)),

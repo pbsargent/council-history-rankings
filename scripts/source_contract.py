@@ -35,7 +35,7 @@ def inspect_source(source: Path, payload=None):
         if missing:
             raise ValueError(f"Missing canonical worksheets: {sorted(missing)}")
         contracts = {
-            "Councils": (2, {**COUNCIL_HEADERS, 15: "TAY", 16: "TAY %", 17: "TAY Rank"}),
+            "Councils": (2, {**COUNCIL_HEADERS, 15: "TAY", 16: "TAY %", 17: "TAY Rank", 18: "Sqare Miles", 19: "% Urban"}),
             "Pack_Troops": (2, COUNCIL_HEADERS),
             "Unit_PIN": (1, {2: "Council", 3: "Units", 4: "pinstatus", 5: "applystatus",
                              6: "strisfundraisingstatusactive", 7: "stristrialvisitallowed",
@@ -59,6 +59,9 @@ def inspect_source(source: Path, payload=None):
             for col in (3, 4, 5, 9):
                 if clean_number(cells.get(col)) is None:
                     raise ValueError(f"Missing numeric source value: {cells[2]} column {col}")
+            for col in (18, 19):
+                if cells.get(col) not in (None, "") and clean_number(cells[col]) is None:
+                    raise ValueError(f"Invalid geographic source value: {cells[2]} column {col}")
             if cells.get(15) not in (None, "") and clean_number(cells[15]) is None:
                 raise ValueError(f"Invalid source TAY: {cells[2]}")
         if payload is not None:
@@ -67,7 +70,7 @@ def inspect_source(source: Path, payload=None):
                 raise ValueError("Source council population does not exactly match generated rows")
             for cells in rows:
                 record = generated[cells[2].strip()]
-                for field, col in {"units": 3, "current_youth": 4, "prior_youth": 5, "year_end_youth": 9, "tay": 15}.items():
+                for field, col in {"units": 3, "current_youth": 4, "prior_youth": 5, "year_end_youth": 9, "tay": 15, "square_miles": 18, "urban_pct": 19}.items():
                     if record.get(field) != clean_number(cells.get(col)):
                         raise ValueError(f"Source mismatch: {record['council']} {field}")
         retention = []
