@@ -29,6 +29,7 @@ python3 scripts/validate_site.py
 python3 scripts/check_data_quality.py
 python3 -m unittest discover -s scripts -p 'test_*.py'
 node --check assets/dashboard.js
+node --test scripts/test_cst.js
 ```
 
 The run directory must not already exist. Add `--check-only` for a diagnostic build that does not replace the working payload. `prepare_refresh.py` checks original file freshness within a one-hour acquisition window, required sheets and fixed-column headers, council population and joins, exact source TAY and retention values, aggregate-only schema, competition ranks (including ties), the dynamic peer rule, national totals, brand artwork, and system-theme support. Only after all gates pass does it atomically replace working `data/latest.json`. A failed gate leaves that file intact. The source workbook's internal reporting date is distinct from its download time; downloading does not prove that upstream source data has changed.
@@ -46,7 +47,7 @@ python3 scripts/verify_release.py \
   --report "/private/tmp/<unique-refresh-run>/run/deployment.json"
 ```
 
-This waits for Pages success for that SHA, then requires HTTP 200 and exact committed bytes for all four pages, CSS, JavaScript, signature, and JSON with cache-busting queries. JSON equality also verifies timestamp, source population, TAY, uncapped retention, and the aggregate-only payload. Keep private run artifacts and workbooks out of git and the public site.
+This waits for Pages success for that SHA, then requires HTTP 200 and exact committed bytes for all five pages (including the CST Dashboard), CSS, JavaScript, signature, and JSON with cache-busting queries. JSON equality also verifies timestamp, source population, TAY, uncapped retention, and the aggregate-only payload. Keep private run artifacts and workbooks out of git and the public site.
 
 7. Send exactly one outcome email per run to the recipient saved in the automation, including source acquisition time, council count and population changes, TAY coverage/caveats, maximum retention and number above 100%, commit SHA, Pages/live verification result, and live URL. On failure, state the stage, concise cause, any local unpushed commit, and the last verified public state; do not claim success. A post-push failure may already have changed the public site: report that accurately and do not automatically roll back or force-push. Send failure email even when source acquisition fails before a report exists. If email delivery fails, surface that separately in the automation result; do not report it as sent.
 
@@ -59,6 +60,14 @@ Serve locally with any static web server, then open `index.html` through that se
 ## Geographic context
 
 The council overview and rankings include `square_miles` (matched ZIP land area) and `urban_pct` (2020 Census urban population share), imported unchanged from Councils columns R and S. The source header in R is spelled “Sqare Miles”; Data_Census_Gov supplies the full definitions. Source blanks remain unavailable. These fields do not change peer selection or growth ranks. The guarded refresh checks both source headers and exact values.
+
+## CST Dashboard
+
+`cst.html` groups councils by the snapshot's `cst` assignment, with an All CSTs view and source-derived territory links (`cst.html?cst=7`, for example). Council counts and CST lists are never fixed. Unknown CST links show All CSTs with an explanatory notice; missing source assignments appear in an Unassigned CST group.
+
+Territory membership totals sum the councils in view. YOY and year-end growth divide the summed youth change by the corresponding summed baseline, rather than averaging council rates. TAY penetration uses only councils with positive TAY, including those same councils in its youth numerator. Missing TAY remains unavailable and affected councils are named. An empty selection has undefined membership totals and rates, rather than fabricated zeros.
+
+Search narrows summaries, growth comparisons, source coverage, and council details together; reset restores the selected territory. Council rows expand to membership, market/geographic context, program Unit Metrics, and BeAScout indicators, with links to the council Overview and Unit Health. Program/PIN populations remain separate from membership totals; council ranks remain national. Imported “retention” values remain uncapped and disclose their unverified cohort/window. `node --test scripts/test_cst.js` covers partitioning, national reconciliation, count-weighted growth, TAY coverage, empty/zero-denominator cases, source changes, search scope, and imported metric preservation.
 
 ## Visual identity
 

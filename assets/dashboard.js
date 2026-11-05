@@ -241,7 +241,7 @@ function renderHealth(data) {
       ["Units with membership growth", metric.membership_growth_unit_rate],
       ["Advancement / leadership", metric.advancement_rate],
       ["Outdoor activity", metric.outdoor_rate],
-      ["Retention", metric.retention_rate],
+      ["Imported “retention”*", metric.retention_rate],
     ];
     document.getElementById("capabilityChart").innerHTML = capabilities.map(([label, value]) => chartRow(label, `${program} workbook signal`, value, Math.max(1, value || 0), formatPct0)).join("");
   }
@@ -270,6 +270,161 @@ function initAbout(data) {
   document.getElementById("methodSource").innerHTML = `${sourceLink(data)}<span>${escapeHtml(data.metadata.source_name)} was downloaded ${escapeHtml(dateFmt.format(new Date(data.metadata.source_downloaded_at)))}. The site data was generated ${escapeHtml(dateFmt.format(new Date(data.metadata.generated_at)))} from cached workbook values.</span>`;
 }
 
+// CSTs are source assignments, never a fixed list of territories or councils.
+function cstGroups(councils) {
+  const groups = new Map();
+  for (const council of councils) {
+    const key = council.cst == null ? "unassigned" : String(council.cst);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(council);
+  }
+  return [...groups].sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }));
+}
+
+const cstLabel = (key) => key === "unassigned" ? "Unassigned CST" : `CST ${key}`;
+
+function membershipSummary(rows) {
+  // Missing observations stay unavailable. TAY uses only the covered councils
+  // for BOTH numerator and denominator, just like the national payload.
+  const sum = (field) => rows.length && rows.every((row) => row[field] != null)
+    ? rows.reduce((total, row) => total + row[field], 0) : null;
+  const current = sum("current_youth");
+  const prior = sum("prior_youth");
+  const yearEnd = sum("year_end_youth");
+  const covered = rows.filter((row) => row.tay != null && row.tay > 0);
+  const tay = covered.reduce((total, row) => total + row.tay, 0);
+  const tayYouth = covered.reduce((total, row) => total + row.current_youth, 0);
+  const delta = current == null || prior == null ? null : current - prior;
+  const yearEndDelta = current == null || yearEnd == null ? null : current - yearEnd;
+  return { councils: rows.length, units: sum("units"), current_youth: current,
+    prior_youth: prior, yoy_delta: delta, yoy_pct: prior > 0 && delta != null ? delta / prior : null,
+    year_end_youth: yearEnd, year_end_delta: yearEndDelta,
+    year_end_pct: yearEnd > 0 && yearEndDelta != null ? yearEndDelta / yearEnd : null,
+    tay: covered.length ? tay : null, tay_pct: tay > 0 ? tayYouth / tay : null,
+    tay_covered_councils: covered.length };
+}
+
+function cstCouncilDetail(data, council) {
+  const membership = [
+    metricLine("Current youth", formatNumber(council.current_youth)),
+    metricLine("Prior-year youth", formatNumber(council.prior_youth)),
+    metricLine("YOY change", `${formatSigned(council.yoy_delta)} · ${formatSignedPct(council.yoy_pct)}`, classForValue(council.yoy_delta)),
+    metricLine("2025 year-end youth", formatNumber(council.year_end_youth)),
+    metricLine("Change since year-end", `${formatSigned(council.year_end_delta)} · ${formatSignedPct(council.year_end_pct)}`, classForValue(council.year_end_delta)),
+    metricLine("National YOY / year-end rank", `${formatRank(council.yoy_rank)} / ${formatRank(council.year_end_rank)}`),
+    metricLine("Registered units", formatNumber(council.units)),
+  ].join("");
+  const market = [
+    metricLine("TAY population", formatNumber(council.tay)),
+    metricLine("TAY penetration", formatPct(council.tay_pct)),
+    metricLine("National TAY rank", formatRank(council.tay_rank)),
+    metricLine("Square miles", formatNumber(council.square_miles)),
+    metricLine("Urban population (2020)", formatPct(council.urban_pct)),
+  ].join("");
+  const pin = council.pin;
+  const pins = pin ? [
+    metricLine("Unit PIN population", formatNumber(pin.units)),
+    ...[["PIN active", "pin_active_rate"], ["Apply active", "apply_active_rate"],
+      ["Fundraising active", "fundraising_active_rate"], ["Trial visit allowed", "trial_visit_rate"],
+      ["Unit fee listed", "unit_fee_rate"], ["Updated in a year", "updated_in_year_rate"],
+      ["Meeting day listed", "meeting_day_rate"]].map(([label, key]) => metricLine(label, formatPct0(pin[key]))),
+  ].join("") : '<p class="muted">No Unit PIN record is available.</p>';
+  const programs = Object.entries(data.unit_metrics).map(([program, rows]) => {
+    const metric = rows.find((row) => row.council_number === council.council_number);
+    if (!metric) return `<tr><th scope="row">${escapeHtml(program)}</th><td colspan="11">No metric record available</td></tr>`;
+    return `<tr><th scope="row">${escapeHtml(program)}</th><td class="num">${formatNumber(metric.units)}</td><td class="num">${formatNumber(metric.youth_current)}</td><td class="num ${classForValue(metric.youth_growth_rate)}">${formatSignedPct(metric.youth_growth_rate)}</td><td class="num">${metric.average_metric?.toFixed(2) ?? "—"}</td><td class="num">${formatPct0(metric.metric_low_rate)}</td><td class="num">${formatPct0(metric.trained_rate)}</td><td class="num">${formatPct0(metric.healthy_size_rate)}</td><td class="num">${formatPct0(metric.membership_growth_unit_rate)}</td><td class="num">${formatPct0(metric.advancement_rate)}</td><td class="num">${formatPct0(metric.outdoor_rate)}</td><td class="num">${formatPct(metric.retention_rate)}</td></tr>`;
+  }).join("");
+  const packTroop = council.pack_troop;
+  return `<div class="council-detail">
+    <div class="council-detail-grid">
+      <section><h3>Membership</h3><div class="metric-stack">${membership}</div></section>
+      <section><h3>Market and geography</h3><div class="metric-stack">${market}</div></section>
+      <section><h3>BeAScout indicators</h3><div class="metric-stack">${pins}</div></section>
+    </div>
+    ${packTroop ? `<p class="muted">Packs and troops combined: ${formatNumber(packTroop.units)} units · ${formatNumber(packTroop.current_youth)} youth · ${formatSignedPct(packTroop.yoy_pct)} YOY.</p>` : ""}
+    <h3>Program Unit Metrics</h3>
+    <p class="panel-intro">Program tabs use a separate population from membership totals above. Blank values remain unavailable. Scroll the table for all measures.</p>
+    <div class="table-wrap program-table" tabindex="0" role="region" aria-label="Scrollable program metrics"><table><caption class="sr-only">Program Unit Metrics for ${escapeHtml(council.council)}</caption><thead><tr><th scope="col">Program</th><th scope="col" class="num">Units</th><th scope="col" class="num">Youth</th><th scope="col" class="num">YOY %</th><th scope="col" class="num">Avg metric</th><th scope="col" class="num">Metric 0–2</th><th scope="col" class="num">UL &amp; CC trained</th><th scope="col" class="num">Healthy size</th><th scope="col" class="num">Units growing</th><th scope="col" class="num">Advancement</th><th scope="col" class="num">Outdoor</th><th scope="col" class="num">Imported “retention”*</th></tr></thead><tbody>${programs}</tbody></table></div>
+    <p class="metric-caveat">*Imported “retention” follows the workbook model; its cohort and measurement window are unverified. It is not a verified annual cohort-retention measure. Values above 100% are preserved.</p>
+    <div class="board-actions"><a class="detail-link" href="index.html?council=${encodeURIComponent(council.council_number)}">Council overview</a><a class="detail-link" href="unit-health.html?council=${encodeURIComponent(council.council_number)}">Explore unit health</a></div>
+  </div>`;
+}
+
+function cstGrowthRow(label, detail, value, maxAbs) {
+  const width = value == null ? 0 : Math.abs(value) / maxAbs * 50;
+  const left = value < 0 ? 50 - width : 50;
+  return `<div class="chart-row cst-chart-row"><div class="chart-label">${escapeHtml(label)}<span>${escapeHtml(detail)}</span></div><div class="cst-growth-track" aria-hidden="true"><span class="${value < 0 ? "decline" : "increase"}" style="left:${left.toFixed(3)}%;width:${width.toFixed(3)}%"></span></div><strong class="bar-value ${classForValue(value)}">${formatSignedPct(value)}</strong></div>`;
+}
+
+function renderCst(data, selectedCst) {
+  const search = document.getElementById("cstSearch").value.trim().toLowerCase();
+  const scoped = data.councils.filter((row) => selectedCst === "all" || (row.cst == null ? "unassigned" : String(row.cst)) === selectedCst);
+  const rows = scoped.filter((row) => !search || row.council.toLowerCase().includes(search) || row.council_number.includes(search));
+  const summary = membershipSummary(rows);
+  const groups = cstGroups(rows);
+  const label = selectedCst === "all" ? "All CSTs" : cstLabel(selectedCst);
+  document.getElementById("cstScope").textContent = `${label} · ${rows.length} of ${scoped.length} councils${search ? " match the search" : " in this view"}. Summaries and charts use the councils shown.`;
+  document.getElementById("cstKpis").innerHTML = [
+    kpiCard("Councils", formatNumber(summary.councils), `${groups.length} ${groups.length === 1 ? "territory" : "territories"} in view`),
+    kpiCard("Current youth", formatNumber(summary.current_youth), `${formatSigned(summary.yoy_delta)} year over year`, tone(summary.yoy_pct)),
+    kpiCard("YOY growth", formatSignedPct(summary.yoy_pct), `Prior youth: ${formatNumber(summary.prior_youth)}`, tone(summary.yoy_pct)),
+    kpiCard("Registered units", formatNumber(summary.units), "Council membership population"),
+    kpiCard("Change since year-end", formatSignedPct(summary.year_end_pct), `${formatSigned(summary.year_end_delta)} since year-end 2025`, tone(summary.year_end_pct)),
+    kpiCard("TAY penetration", formatPct(summary.tay_pct), `${summary.tay_covered_councils} of ${rows.length} councils with TAY`),
+    kpiCard("TAY population", formatNumber(summary.tay), "Covered councils only"),
+    kpiCard("Councils growing", formatNumber(rows.filter((row) => row.yoy_pct > 0).length), "Positive year-over-year membership growth"),
+  ].join("");
+  document.getElementById("cstChartTitle").textContent = selectedCst === "all" ? "Year-over-Year Growth by CST" : `${label} Council Growth`;
+  const comparisons = selectedCst === "all"
+    ? groups.map(([key, councils]) => ({ label: cstLabel(key), summary: membershipSummary(councils) }))
+    : [...rows].sort((a, b) => (b.yoy_pct ?? -Infinity) - (a.yoy_pct ?? -Infinity) || a.council.localeCompare(b.council))
+      .map((row) => ({ label: row.council, summary: row }));
+  const maxAbs = Math.max(...comparisons.map((row) => Math.abs(row.summary.yoy_pct || 0)), .001);
+  document.getElementById("cstGrowthChart").innerHTML = comparisons.length ? comparisons.map(({ label: name, summary: s }) => cstGrowthRow(name, `${formatNumber(s.current_youth)} youth · ${formatSigned(s.yoy_delta)} YOY`, s.yoy_pct, maxAbs)).join("") : '<div class="empty-state">No councils match this search.</div>';
+  const sort = document.getElementById("cstSort").value;
+  const sorters = {
+    name: (a, b) => a.council.localeCompare(b.council),
+    growth: (a, b) => (b.yoy_pct ?? -Infinity) - (a.yoy_pct ?? -Infinity) || a.council.localeCompare(b.council),
+    youth: (a, b) => b.current_youth - a.current_youth || a.council.localeCompare(b.council),
+  };
+  document.getElementById("cstGroups").innerHTML = groups.length ? groups.map(([key, councils]) => {
+    const total = membershipSummary(councils);
+    return `<details class="territory-group"${selectedCst !== "all" || search ? " open" : ""}><summary class="territory-summary"><span><strong>${escapeHtml(cstLabel(key))}</strong><small>${councils.length} ${councils.length === 1 ? "council" : "councils"} · ${formatNumber(total.units)} units</small></span><span>${formatNumber(total.current_youth)} youth</span><span class="${classForValue(total.yoy_pct)}">${formatSignedPct(total.yoy_pct)} YOY</span></summary><div class="territory-councils">${[...councils].sort(sorters[sort]).map((council) => `<details class="council-record" data-council="${escapeHtml(council.council_number)}"><summary class="council-summary"><span class="council-name"><strong>${escapeHtml(council.council)}</strong><small>${formatNumber(council.units)} units · National YOY rank ${formatRank(council.yoy_rank)}</small></span><span>${formatNumber(council.current_youth)} youth</span><span class="${classForValue(council.yoy_pct)}">${formatSignedPct(council.yoy_pct)} YOY</span></summary>${cstCouncilDetail(data, council)}</details>`).join("")}</div></details>`;
+  }).join("") : '<div class="empty-state">No councils match this search. Reset filters to restore this territory’s councils.</div>';
+  const missingTay = rows.filter((row) => row.tay == null || row.tay <= 0);
+  document.getElementById("cstSource").innerHTML = `${sourceLink(data)}<span>${escapeHtml(data.metadata.source_name)}, downloaded ${escapeHtml(dateFmt.format(new Date(data.metadata.source_downloaded_at)))}. CST assignments come from the council membership source. Growth uses summed current and baseline youth, not an average of council percentages. TAY penetration uses youth and TAY only from covered councils. ${missingTay.length ? `TAY unavailable for ${escapeHtml(missingTay.map((row) => row.council).join("; "))}.` : "All councils in this view have TAY coverage."} Rankings shown are national; program and PIN populations may differ from membership totals.</span>`;
+}
+
+function initCst(data) {
+  const groups = cstGroups(data.councils);
+  const requested = new URLSearchParams(window.location.search).get("cst");
+  const selectedCst = requested === "all" || groups.some(([key]) => key === requested) ? requested : "all";
+  const title = selectedCst === "all" ? "CST Dashboard" : `${cstLabel(selectedCst)} Dashboard`;
+  document.getElementById("cstTitle").textContent = title;
+  document.title = `${title} · Council Performance Rankings`;
+  document.getElementById("cstSubtitle").textContent = selectedCst === "all"
+    ? "Explore every territory, then expand its councils for membership and program details."
+    : `Membership performance and council details for ${cstLabel(selectedCst)}.`;
+  document.getElementById("cstLinks").innerHTML = [["all", data.councils], ...groups].map(([key, councils]) => `<a class="cst-link${selectedCst === key ? " selected" : ""}" href="cst.html?cst=${encodeURIComponent(key)}"${selectedCst === key ? ' aria-current="page"' : ""}><strong>${key === "all" ? "All CSTs" : escapeHtml(cstLabel(key))}</strong><span>${councils.length} ${councils.length === 1 ? "council" : "councils"}</span></a>`).join("");
+  if (requested != null && requested !== selectedCst) {
+    const notice = document.createElement("p");
+    notice.className = "panel-intro";
+    notice.textContent = "That CST is not in the current source. Showing all CSTs.";
+    document.getElementById("cstLinks").before(notice);
+  }
+  document.getElementById("cstSearch").addEventListener("input", () => renderCst(data, selectedCst));
+  document.getElementById("cstSort").addEventListener("change", () => renderCst(data, selectedCst));
+  document.getElementById("cstReset").addEventListener("click", () => {
+    document.getElementById("cstSearch").value = "";
+    document.getElementById("cstSort").value = "name";
+    renderCst(data, selectedCst);
+  });
+  for (const [id, open] of [["cstExpand", true], ["cstCollapse", false]]) {
+    document.getElementById(id).addEventListener("click", () => document.querySelectorAll("#cstGroups details").forEach((detail) => { detail.open = open; }));
+  }
+  renderCst(data, selectedCst);
+}
+
 function showError(error) {
   const main = document.querySelector("main");
   const banner = document.createElement("div");
@@ -289,6 +444,7 @@ async function main() {
     if (page === "rankings") initRankings(data);
     if (page === "unit-health") initHealth(data);
     if (page === "about") initAbout(data);
+    if (page === "cst") initCst(data);
   } catch (error) {
     showError(error);
   }

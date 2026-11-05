@@ -12,7 +12,7 @@ from build_site import SOURCE_WORKBOOK_URL
 from source_contract import PROGRAM_SHEETS
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["index.html", "rankings.html", "unit-health.html", "about.html"]
+PAGES = ["index.html", "rankings.html", "cst.html", "unit-health.html", "about.html"]
 REQUIRED = [*PAGES, "assets/dashboard.css", "assets/dashboard.js", "assets/scouting-america-signature.png", ".nojekyll"]
 COUNCIL = set("cst council council_number units current_youth prior_youth yoy_delta yoy_pct yoy_rank year_end_youth year_end_delta year_end_pct year_end_rank tay tay_pct tay_rank square_miles urban_pct".split())
 PIN = set("council council_number units pin_active_rate apply_active_rate fundraising_active_rate trial_visit_rate unit_fee_rate updated_in_year_rate meeting_day_rate".split())
