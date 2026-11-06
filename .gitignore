@@ -1,3 +1,5 @@
 .DS_Store
 work/
 *.inspect.ndjson
+
+__pycache__/

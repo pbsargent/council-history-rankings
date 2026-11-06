@@ -10,3 +10,6 @@ Read README.md completely before refresh or publication work. Use its guarded da
 - Preserve the Scouting America signature, palette, Arial typography, responsive layout, and system light/dark support. Branding changes require explicit design work and visual verification; a daily source refresh does not authorize redesign.
 - Run the required validators and regression tests before committing. Push only the reviewed refresh commit. Run scripts/verify_release.py against that exact commit and retained candidate.
 - Follow the private automation's email instructions on every success or failure, including acquisition failures. Never expose credentials or claim an email was sent without a successful send result.
+
+## Independent historical extension
+This clone is council-history-rankings, not the original production repository. The user authorized historical features and a separate public GitHub Pages deployment. No scheduled refresh or outcome email is installed by this feature release. Historical source details stay in the local archive; only council/program aggregates go to GitHub. Ships and Crews are split by explicit Unit prefixes in the combined source Order category, with unknown types preserved separately. Historical routines and tests are documented in this clone's README. Preserve the dated original snapshot.

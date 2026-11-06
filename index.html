@@ -1,69 +1,13 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Interactive national Scouting council performance rankings and peer comparisons.">
-  <title>Council Performance Rankings</title>
-  <link rel="stylesheet" href="assets/dashboard.css?v=20261104-cst">
-</head>
-<body data-page="overview">
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Council ranking navigation">
-      <a class="brand" href="index.html" aria-label="Council Rankings home"><img src="assets/scouting-america-signature.png" alt="Scouting America" width="660" height="110"><span>Council Rankings</span></a>
-      <nav>
-        <a class="active" aria-current="page" href="index.html">Overview</a>
-        <a href="rankings.html">National Rankings</a>
-        <a href="cst.html">CST Dashboard</a>
-        <a href="unit-health.html">Unit Health</a>
-        <a href="about.html">Methodology</a>
-      </nav>
-      <div class="sidebar-note"><span>Workbook refresh</span><strong data-source-date>Loading…</strong></div>
-    </aside>
-    <main>
-      <header class="hero">
-        <div>
-          <p class="eyebrow">National council intelligence</p>
-          <h1>Council Performance Rankings</h1>
-          <p class="lede">A web-first view of membership movement, national standing, comparable councils, and unit health.</p>
-        </div>
-        <div class="hero-actions">
-          <label class="control light"><span>Focus council</span><select id="councilSelect" aria-label="Focus council"></select></label>
-          <p class="filter-note" id="focusNote">Loading workbook data…</p>
-        </div>
-      </header>
-
-      <section class="kpi-grid" id="overviewKpis" aria-label="Selected council metrics"></section>
-
-      <section class="focus-grid">
-        <section class="panel">
-          <div class="panel-head"><div><p class="section-kicker">Peer comparison</p><h2 id="peerTitle">Focus council compared with peers</h2></div><span class="count-pill" id="peerCount"></span></div>
-          <p class="panel-intro">Councils within ±20% of the selected council’s unit count, current youth membership, and TAY population.</p>
-          <div class="chart-list" id="peerChart"></div>
-        </section>
-        <section class="panel">
-          <div class="panel-head"><div><p class="section-kicker">Today’s read</p><h2>Signals to Watch</h2></div></div>
-          <div class="signal-list" id="signals"></div>
-        </section>
-      </section>
-
-      <section class="dashboard-grid">
-        <section class="panel wide">
-          <div class="panel-head"><div><p class="section-kicker">National movement</p><h2>Leaders in Year-over-Year Growth</h2></div><a class="detail-link" href="rankings.html">Explore all councils</a></div>
-          <div class="table-wrap"><table><thead><tr><th>Rank</th><th>Council</th><th class="num">Youth</th><th class="num">Change</th><th class="num">Growth</th></tr></thead><tbody id="growthRows"></tbody></table></div>
-        </section>
-        <section class="panel">
-          <div class="panel-head compact"><div><p class="section-kicker">National context</p><h2>Across the Workbook</h2></div></div>
-          <div class="metric-stack" id="nationalContext"></div>
-        </section>
-      </section>
-
-      <section class="panel source-panel">
-        <div><p class="section-kicker">Source</p><h2>Workbook and calculation basis</h2></div>
-        <p id="sourceSummary">Loading source metadata…</p>
-      </section>
-    </main>
-  </div>
-  <script src="assets/dashboard.js?v=20261104-cst"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Monthly council membership and unit history, national comparisons, program trends and merger context."><title>Council History Rankings</title><link rel="stylesheet" href="assets/dashboard.css"><link rel="stylesheet" href="assets/history.css"></head>
+<body data-page="history"><div class="app-shell"><aside class="sidebar" aria-label="Council history navigation"><a class="brand" href="index.html"><img src="assets/scouting-america-signature.png" alt="Scouting America" width="660" height="110"><span>Council History Rankings</span></a><nav><a class="active" aria-current="page" href="index.html">Historical Trends</a><a href="overview.html">Snapshot Overview</a><a href="rankings.html">Snapshot Rankings</a><a href="cst.html">CST Dashboard</a><a href="unit-health.html">Unit Health</a><a href="about.html">Methodology</a></nav><div class="sidebar-note"><span>Historical archive acquired</span><strong>November 6, 2026</strong><span id="archive-count">Loading history…</span></div></aside>
+<main><header class="hero compact-hero"><div><p class="eyebrow">Membership and unit history</p><h1>Council History Rankings</h1><p class="lede">Follow the trend, compare councils, and see which programs drive change.</p></div><div class="hero-actions"><label class="control light"><span>Focus council</span><select id="historyCouncil" aria-label="Focus council"></select></label><p class="filter-note" id="coverageLabel"></p></div></header>
+<div id="historyError" role="alert"></div><section class="toolbar history-toolbar" aria-label="Historical filters"><label class="control"><span>Year</span><select id="historyYear"><option value="all">All history</option></select></label><label class="control"><span>Report month</span><select id="historyMonth"></select></label><label class="control"><span>Program</span><select id="historyProgram"></select></label><label class="control"><span>Trend display</span><select id="historyScale"><option value="index">Indexed · Jan 2022 = 100</option><option value="count">Council counts</option></select></label><label class="control"><span>Comparison group</span><select id="historyGroup"><option value="national">National</option><option value="peers">Fixed snapshot peers</option></select></label></section>
+<p id="periodNotice" class="notice"></p><section class="kpi-grid compact-kpis" id="historyKpis" aria-label="Selected council summary" aria-live="polite"></section>
+<div class="history-tabs" role="tablist" aria-label="Historical views"><button id="tab-trends" role="tab" aria-controls="view-trends" aria-selected="true">Council trends</button><button id="tab-year" role="tab" aria-controls="view-year" aria-selected="false">Council year detail</button><button id="tab-compare" role="tab" aria-controls="view-compare" aria-selected="false">Compare councils</button><button id="tab-seasonal" role="tab" aria-controls="view-seasonal" aria-selected="false">Seasonality &amp; ranks</button></div>
+<section id="view-trends" role="tabpanel" aria-labelledby="tab-trends"><div class="focus-grid"><section class="panel"><div class="panel-head"><h2>Membership trend</h2><span class="count-pill" id="youthNow"></span></div><div class="history-legend"><span class="focus-swatch">Focus council</span><span class="comparison-swatch" data-group-label>National</span></div><svg id="youthTrend" class="history-chart" role="img" aria-label="Monthly membership trend"></svg></section><section class="panel"><div class="panel-head"><h2>Unit trend*</h2><span class="count-pill" id="unitsNow"></span></div><div class="history-legend"><span class="focus-swatch">Focus council</span><span class="comparison-swatch" data-group-label>National</span></div><svg id="unitTrend" class="history-chart" role="img" aria-label="Monthly unit detail sum trend"></svg></section></div><div class="focus-grid"><section class="panel"><div class="panel-head"><h2>Program snapshot</h2><button class="detail-link" id="downloadPrograms">Download CSV</button></div><div class="table-wrap" role="region" aria-label="Program totals" tabindex="0"><table class="history-program-table"><thead><tr><th>Program</th><th class="num">Youth</th><th class="num">YoY change</th><th class="num">YoY %</th><th class="num">Units*</th><th class="num">Youth/unit*</th></tr></thead><tbody id="programRows"></tbody></table></div></section><section class="panel"><div class="panel-head"><h2>Peer membership comparison</h2><span class="count-pill" id="historicalPeerCount"></span></div><p class="panel-intro" id="peerBasis"></p><div id="historicalPeers" class="chart-list"></div></section></div><section class="panel"><div class="panel-head"><h2>Merger &amp; boundary context</h2></div><div id="mergerContext"></div></section></section>
+<section id="view-year" role="tabpanel" aria-labelledby="tab-year" hidden><section class="panel"><div class="panel-head"><div><h2 id="annualDetailTitle">Council year detail</h2><p class="metric-caveat">Choose a year above. Select a month below to update the scorecard and program snapshot.</p></div><button class="detail-link" id="downloadYear">Download year CSV</button></div><div class="table-wrap" role="region" aria-label="Monthly council year detail" tabindex="0"><table><thead><tr><th>Report month</th><th class="num">Youth</th><th class="num">Same month prior year</th><th class="num">Net change</th><th class="num">YoY %</th><th class="num">Units*</th><th class="num">Unit YoY %*</th><th class="num">Youth/unit*</th></tr></thead><tbody id="annualDetailRows"></tbody></table></div></section><section class="panel"><div class="panel-head"><h2>Selected month · program breakdown</h2></div><div class="table-wrap" role="region" aria-label="Selected month program breakdown" tabindex="0"><table class="history-program-table"><thead><tr><th>Program</th><th class="num">Youth</th><th class="num">YoY change</th><th class="num">YoY %</th><th class="num">Units*</th><th class="num">Youth/unit*</th></tr></thead><tbody id="annualProgramRows"></tbody></table></div></section></section>
+<section id="view-compare" role="tabpanel" aria-labelledby="tab-compare" hidden><section class="panel"><div class="panel-head"><div><h2>Membership growth vs. unit growth*</h2><p class="metric-caveat">Each point is a council. Select a point or a table row to change the focus council.</p></div></div><svg id="growthScatter" class="history-scatter" role="img" aria-label="Council membership growth compared with unit detail growth"></svg><p id="scatterCoverage" class="metric-caveat"></p></section><section class="panel"><div class="panel-head"><h2>Council comparison table</h2><button id="downloadCouncils" class="detail-link">Download CSV</button></div><div class="toolbar"><label class="control"><span>Find council</span><input id="historySearch" type="search" placeholder="Name or number"></label><label class="control"><span>Snapshot CST</span><select id="historyCst"><option value="all">All CSTs</option></select></label><label class="control"><span>Sort</span><select id="historySort"><option value="growth">Youth growth %</option><option value="delta">Net youth change</option><option value="size">Youth membership</option><option value="units">Units*</option><option value="name">Council name</option></select></label><div class="control"><span id="tableCoverage"></span><button id="historyReset" class="detail-link">Reset table filters</button></div></div><div class="table-wrap tall" role="region" aria-label="Council rankings" tabindex="0"><table><thead><tr><th>Growth rank</th><th>Council</th><th class="num">Youth</th><th class="num">Net change</th><th class="num">YoY %</th><th class="num">Units*</th><th class="num">Unit YoY %*</th><th>Context</th></tr></thead><tbody id="historicalRankingRows"></tbody></table></div></section></section>
+<section id="view-seasonal" role="tabpanel" aria-labelledby="tab-seasonal" hidden><section class="panel"><div class="panel-head"><h2>Monthly membership growth</h2></div><p class="panel-intro">Year-over-year change for the focus council. Blank cells indicate unavailable months.</p><div id="seasonHeatmap" class="table-wrap" role="region" aria-label="Monthly membership growth heatmap" tabindex="0"></div></section><section class="panel"><div class="panel-head"><h2>National membership-growth rank</h2></div><svg id="rankTrend" class="history-chart" role="img" aria-label="Growth rank over time; lower rank numbers are better"></svg><p class="metric-caveat">Rank 1 is highest growth; competition ties share ranks. The number of councils with usable source rows and positive baselines can vary by month. Hover or tap a point for rank and population.</p></section></section>
+<details class="panel history-method"><summary>Source, definitions and limitations</summary><p>Historical source: my.Scouting National Membership and Total Units dashboard exports acquired November 6, 2026. Council/program aggregates only. December 2020 and December 2021 are annual points; monthly coverage begins January 2022. November 2026 is month-to-date. Missing council/program rows remain unavailable. Ships/Sea Scouts and Crews/Venturing are separated using explicit Ship/Crew unit labels within the source’s combined Crews category; other categories retain source labels. Unspecified unit types remain a separate bucket. Source summaries sum blank numeric detail cells as zero; those sums do not establish independent zero-member or zero-unit records.</p><p>*Unit measures are sums of exported detail, not verified distinct-unit counts. In 34 of 61 unit reports these sums differ from dashboard totals; no corrections were invented. Unit growth, unit-based scatter positions and youth-per-unit ratios are provisional.</p><p>Peer sets use the original November 6 ranking snapshot’s ±20% units/youth/TAY rule and stay fixed as the historical month changes. Snapshot CST/TAY are context only. There is no historical TAY penetration or cohort retention calculation. Benchmarks recompute growth from summed counts; indexed series use January 2022 = 100. Group series require the same councils to have values for every month from January 2022 through the selected month, so coverage is stable within each view.</p><p>Names are current archive aliases matched by council number. Historical geography may be remapped. Merger notes are research with qualified dates; no predecessor/successor counts are added, and partial transfers are not whole-council rollups. Ranks are descriptive, not merger-adjusted performance assessments.</p><p id="benchmarkCoverage"></p><p>Original ranking and Unit Health pages remain a separately sourced November 6, 2026 snapshot. Their source populations and definitions differ from this historical archive.</p></details>
+<p class="metric-caveat" id="historyProvenance"></p></main></div><script src="assets/history.js"></script></body></html>

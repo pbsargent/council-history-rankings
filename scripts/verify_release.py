@@ -14,9 +14,9 @@ from urllib.request import Request, urlopen
 
 from validate_site import ROOT, PAGES, validate
 
-SITE = "https://pbsargent.github.io/council-performance-rankings/"
-REPO = "pbsargent/council-performance-rankings"
-ASSETS = [*PAGES, "assets/dashboard.css", "assets/dashboard.js", "assets/scouting-america-signature.png", "data/latest.json"]
+SITE = "https://pbsargent.github.io/council-history-rankings/"
+REPO = "pbsargent/council-history-rankings"
+ASSETS = [*PAGES, "assets/dashboard.css", "assets/dashboard.js", "assets/scouting-america-signature.png", "data/latest.json", "data/history.json", "assets/history.js", "assets/history.css"]
 
 
 def git_file(commit, path):
@@ -27,7 +27,7 @@ def verify_files(expected, fetch):
     for path, content in expected.items():
         if fetch(path) != content:
             raise ValueError(f"Live file does not match pushed commit: {path}")
-    payload = json.loads(expected["data/latest.json"])
+    payload = json.loads(expected["data/latest.json", "data/history.json", "assets/history.js", "assets/history.css"])
     failures = validate(payload)
     if failures:
         raise ValueError("; ".join(failures))
@@ -54,7 +54,7 @@ def main():
             raise ValueError("Expected a full commit SHA")
         report["commit"] = commit
         expected = {path: git_file(commit, path) for path in ASSETS}
-        if expected["data/latest.json"] != args.expected.read_bytes():
+        if expected["data/latest.json", "data/history.json", "assets/history.js", "assets/history.css"] != args.expected.read_bytes():
             raise ValueError("Pushed payload does not match validated candidate")
         environment = dict(os.environ, GH_TOKEN=args.token_file.read_text().strip())
         deadline = time.monotonic() + args.timeout
@@ -87,7 +87,7 @@ def main():
 
         report.update(verify_files(expected, fetch), status="pass", stage="live verified",
                       verified_at=datetime.now(timezone.utc).isoformat(),
-                      payload_sha256=hashlib.sha256(expected["data/latest.json"]).hexdigest())
+                      payload_sha256=hashlib.sha256(expected["data/latest.json", "data/history.json", "assets/history.js", "assets/history.css"]).hexdigest())
     except Exception as error:
         report["error"] = str(error)
     args.report.parent.mkdir(parents=True, exist_ok=True)

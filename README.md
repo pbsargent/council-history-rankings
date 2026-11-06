@@ -1,3 +1,21 @@
+# Council History Rankings
+
+Independent historical dashboard cloned from `pbsargent/council-performance-rankings` at 832c5b65f33dcb8280e9ed762930c8fd288fcfba. New home: https://pbsargent.github.io/council-history-rankings/
+
+## Historical extension contract
+
+This user-authorized feature release uses verified November 6 historical my.Scouting exports, not a new daily workbook refresh. It preserves the original ranking workbook payload byte-for-byte as a dated snapshot. No daily automation is installed or copied. Choose council, year and program for a monthly council ledger, then select a month for its program breakdown. Ships and Crews are separate throughout all historical views. The historical home is index.html; the cloned overview is overview.html. Original source/privacy/branding/retention contracts below remain applicable to the snapshot. The original production repository and schedule remain unchanged.
+
+Public history contains only council/program aggregates for 61 periods: December 2020, December 2021, monthly January 2022–October 2026 and partial November 2026. Default is the latest complete month, October. No member or unit detail rows, workbooks, local paths, credentials, or private receipts are published. Ships/Sea Scouts and Crews/Venturing are separated by explicit Unit labels within source Order 3 - Crews, with any unclassified rows retained separately. Other source Order labels are preserved; missing program rows remain unavailable, not invented zeros. Existing program summary CSVs sum blank source numeric cells as zero; do not interpret that as proof of a distinct zero-member unit or absence of a program.
+
+Unit values are sums of exported detail, not distinct-unit counts. The archive has 34 unit reports whose sum differs from the dashboard control; no adjustment was made. Youth-per-unit and unit-derived comparisons are provisional. Snapshot Unit Metrics/PIN have separate populations. Historical counts do not establish annual cohort retention or age cohorts. No historical TAY penetration is computed. Peer sets use the original snapshot's ±20% youth/units/TAY rule, fixed over the historical view; councils without context/TAY have no matched peers. CST assignments are snapshot context, not historical boundaries. National/peer growth is recomputed from summed counts, not mean percentages. Ranks use observed councils with valid baselines in each period and competition ties; population changes can move ranks.
+
+Merger notes are sourced research, not a certified legal register. No geographic restatement or predecessor/successor addition is performed. Partial transfers are not whole-council rollups; uncertain dates remain qualified. Missing historic rows are unavailable, not zero membership. Pre-2022 annual observations are separate points; no monthly interpolation across gaps.
+
+Build: `python3 scripts/build_history.py --source <verified-archive-root>`. Validate retained snapshot using the original validators/tests and history with `node --test scripts/test_history.js` plus `python3 scripts/validate_history.py`. The builder reconciles all 122 source report totals against private acceptance receipts. Do not commit those receipts.
+
+## Original project documentation (snapshot workflow reference)
+
 # Council Performance Rankings
 
 Static GitHub Pages dashboard built from the latest `Councils Ranked.xlsx` workbook snapshot. The published data contains council-level aggregates only.
