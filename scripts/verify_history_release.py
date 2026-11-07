@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.request import Request,urlopen
 import certifi
 ROOT=Path(__file__).resolve().parents[1];SITE='https://pbsargent.github.io/council-history-rankings/';API='https://api.github.com/repos/pbsargent/council-history-rankings/'
-FILES=['index.html','overview.html','rankings.html','cst.html','unit-health.html','about.html','assets/dashboard.css','assets/dashboard.js','assets/history.css','assets/history.js','assets/scouting-america-signature.png','data/latest.json','data/history.json']
+FILES=['membership-history.html','assets/membership-history.css','assets/membership-history.js','index.html','overview.html','rankings.html','cst.html','unit-health.html','about.html','assets/dashboard.css','assets/dashboard.js','assets/history.css','assets/history.js','assets/scouting-america-signature.png','data/latest.json','data/history.json']
 def main():
  p=argparse.ArgumentParser();p.add_argument('--commit',required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
  result=subprocess.run(['git','credential','fill'],input='protocol=https\nhost=github.com\n\n',text=True,capture_output=True,env=dict(os.environ,GIT_TERMINAL_PROMPT='0'),check=True);creds=dict(x.split('=',1) for x in result.stdout.splitlines() if '=' in x);token=creds['password'];context=ssl.create_default_context(cafile=certifi.where())

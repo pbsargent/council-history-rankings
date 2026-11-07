@@ -96,3 +96,5 @@ Search narrows summaries, growth comparisons, source coverage, and council detai
 The design follows the supplied *Scouting America Brand Guidelines (2024)*, pages 11 and 14–16. It uses the primary blue (`#003F87`), red (`#CE1126`), tan, gray, and white, with approved secondary colors and Arial typography. The signature image is unaltered artwork extracted from page 11, displayed proportionally on white with clear space of at least one fleur-de-lis height.
 
 The site follows the system light/dark preference through `prefers-color-scheme`. Dark mode uses the guide's dark gray, dark blue, and pale blue. Red is never tinted. Signed negative values remain explicit in both themes. Branding changes do not require rebuilding the workbook payload.
+
+Membership History (`membership-history.html`) offers a shareable council/program selection, December year-end bars, months within a selected year, same-month comparisons, youth/unit measures, endpoint changes, observations and scoped CSV export. Available source observations span December 2020–November 2026; November 2026 is partial.
