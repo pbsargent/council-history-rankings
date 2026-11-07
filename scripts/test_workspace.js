@@ -7,3 +7,15 @@ test('all published reports reconcile through workspace national summaries',()=>
 test('stable program trends exclude councils missing any report, keeping Ships separate',()=>{const t=W.wTrend(D,['564','283'],['2026-09','2026-10'],'3 - Ships (Sea Scouts)');assert.deepEqual(t.ids,['564']);assert.deepEqual(t.rows.map(r=>r.youth),[26,27]);assert.equal(W.wRows(D,['564'],'2026-10','3 - Crews (Venturing)')[0].r.youth,66);});
 test('each primary page has the five task links and the correct active page',()=>{for(const [file,label]of [['index.html','My CST'],['councils.html','Councils'],['compare.html','Compare Councils'],['programs.html','Programs'],['about.html','Data &amp; Definitions']]){const text=fs.readFileSync(file,'utf8'),nav=text.match(/<nav aria-label="Main navigation">(.*?)<\/nav>/s)[1];assert.equal((nav.match(/<a /g)||[]).length,5);assert.ok(nav.includes(`href="${file}" class="active" aria-current="page">${label}`));}assert.ok(fs.readFileSync('index.html','utf8').includes('data-view="territory"'));});
 test('all static page routes and assets resolve after the landing-page move',()=>{for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)){const target=m[1].split(/[?#]/)[0];if(!target||/^(https?:|mailto:|data:)/.test(target))continue;assert.ok(fs.existsSync(target),`${file}: missing ${target}`);}}});
+test('full program history retains available observations from councils with gaps',()=>{
+ const periods=['2020-12','2026-09','2026-10'];
+ const program='3 - Ships (Sea Scouts)';
+ const stable=W.wTrend(D,['564','283'],periods.slice(1),program);
+ assert.deepEqual(stable.ids,['564']);
+ const full=W.wTrend(D,['564','283'],periods,program,true);
+ assert.equal(full.rows.length,3);
+ assert.equal(full.rows.at(-1).youth,27);
+ assert.equal(full.rows.at(-1).covered,1);
+ const missing=W.wTrend(D,['283'],periods,program,true);
+ assert.equal(missing.rows.at(-1).youth,null);
+});
