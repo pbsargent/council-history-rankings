@@ -8,3 +8,12 @@
   stroke: var(--ink);
   stroke-width: 2;
 }
+
+/* Keep each checkbox aligned with the first line of its council name. */
+.workspace-selection input[type="checkbox"] {
+  flex: 0 0 1em;
+  width: 1em;
+  height: 1em;
+  margin: .225em 0 0;
+  padding: 0;
+}
