@@ -4,29 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Methodology and source notes for the council ranking dashboard.">
-  <title>Methodology · Council Performance Rankings</title>
-  <link rel="stylesheet" href="assets/dashboard.css?v=20261104-cst">
+  <title>Data &amp; Definitions · Council History Rankings</title>
+  <link rel="stylesheet" href="assets/dashboard.css?v=20261104-cst"><link rel="stylesheet" href="assets/workspace.css">
 </head>
 <body data-page="about">
   <div class="app-shell">
     <aside class="sidebar" aria-label="Council ranking navigation">
-      <a class="brand" href="overview.html" aria-label="Council Rankings home"><img src="assets/scouting-america-signature.png" alt="Scouting America" width="660" height="110"><span>Council History Rankings</span></a>
-      <nav><a href="membership-history.html">Membership History</a>
-        <a href="index.html">Historical Trends</a>
-        <a href="overview.html">Overview</a>
-        <a href="rankings.html">National Rankings</a>
-        <a href="cst.html">CST Dashboard</a>
-        <a href="unit-health.html">Unit Health</a>
-        <a class="active" aria-current="page" href="about.html">Methodology</a>
-      </nav>
+      <a class="brand" href="index.html" aria-label="Council Rankings home"><img src="assets/scouting-america-signature.png" alt="Scouting America" width="660" height="110"><span>Council History Rankings</span></a>
+      <nav aria-label="Main navigation"><a href="index.html">My CST</a><a href="councils.html">Councils</a><a href="compare.html">Compare Councils</a><a href="programs.html">Programs</a><a href="about.html" class="active" aria-current="page">Data &amp; Definitions</a></nav>
       <div class="sidebar-note"><span>Original ranking snapshot</span><strong data-source-date>Loading…</strong></div>
     </aside>
     <main>
       <header class="hero compact-hero">
-        <div><p class="eyebrow">Transparent by design</p><h1>Methodology</h1><p class="lede">What the dashboard publishes, how each comparison is calculated, and what to keep in mind.</p></div>
+        <div><p class="eyebrow">Transparent by design</p><h1>Data &amp; Definitions</h1><p class="lede">What the dashboard publishes, how each comparison is calculated, and what to keep in mind.</p></div>
       </header>
 
-      <section class="method-grid">
+      <div id="definitionsScope"></div><section class="panel"><h2>Historical membership and units</h2><p>my.Scouting National Membership and Total Units exports acquired November 6, 2026 cover December 2020, December 2021, and every month January 2022–November 2026. November 2026 is partial through November 6; December 2026 is unavailable. Youth measures count registrations, not distinct people.</p><p>Units are sums of exported detail, not verified distinct-unit counts. In 34 of 61 reports, detail sums differ from dashboard totals. No corrections were invented. Source numeric blanks were summed as zero within existing aggregates; missing council/program rows remain unavailable. Ships/Sea Scouts and Crews/Venturing are separated by explicit unit labels, with unspecified types separate.</p><p>Historical CST summaries use November 6, 2026 council assignments. They are not historical CST boundaries. Merger notes retain source links and qualified dates; predecessor and successor counts are never added together. Same-month growth uses paired current and prior counts with positive aggregate baselines. Missing observations are not interpolated. Stable-cohort program trends require each included council to have a youth value in every displayed period.</p></section><section class="panel"><h2>Downloads and additional tools</h2><p>Scoped CSV downloads are available in My CST, council profiles, comparisons and Programs.</p><ul><li><a href="membership-history.html" data-scope-link>Annual bars and observation export</a></li><li><a href="trends.html" data-scope-link>Detailed trends, seasonality and national growth ranks</a></li><li><a href="overview.html" data-scope-link>Original council snapshot and market context</a></li><li><a href="rankings.html" data-scope-link>Original snapshot comparison table</a></li><li><a href="cst.html" data-scope-link>Original snapshot CST detail</a></li><li><a href="unit-health.html" data-scope-link>Original snapshot unit metrics and BeAScout indicators</a></li></ul><p>The original snapshot below is separately sourced and dated. It is not changed by historical report-month filters.</p></section><section class="method-grid">
         <article class="panel"><p class="section-kicker">Source</p><h2>Workbook snapshot</h2><p id="methodSource">Loading source metadata…</p></article>
         <article class="panel"><p class="section-kicker">Privacy</p><h2>Aggregate data only</h2><p>The published JSON contains council-level totals and rates. Unit-level worksheet rows and local filesystem paths are deliberately excluded.</p></article>
         <article class="panel"><p class="section-kicker">Growth</p><h2>Consistent denominator</h2><p>Year-over-year growth is calculated as <code>(current youth − prior youth) ÷ prior youth</code>. Year-end change uses 2025 year-end youth as its baseline.</p></article>
@@ -47,5 +40,5 @@
     </main>
   </div>
   <script src="assets/dashboard.js?v=20261104-cst"></script>
-</body>
+<script src="assets/navigation.js"></script></body>
 </html>
